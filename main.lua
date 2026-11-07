@@ -26,23 +26,61 @@ function love.load()
 
     player.anim = player.animations.left
 
-    myNPC = NPC.new('sprites/player-sheet.png', 796,216, 80, 0)
-    drNPC = NPC.new('sprites/player-sheet.png', 804,1036, 0, 80)
+    myNPC = NPC.new('sprites/player-sheet.png', 796, 216, 80, 0)
+    drNPC = NPC.new('sprites/player-sheet.png', 804, 1036, 0, 80)
 
     -- narrator init
     narrator:init()
 
-    characterBella = narrator:newCharacter("Bella", "sprites/bella_avatar.png")
-    characterDoc   = narrator:newCharacter("Doctor", "sprites/doctor_avatar.png")
+    -- create villager character
+    characterVillager = narrator:newCharacter("Villager", "sprites/bella_avatar.png")
+    -- characterDoc = narrator:newCharacter("Doctor", "sprites/doctor_avatar.png")
 
-    narrator:bindNPC(myNPC, characterBella, "BellaSaysHello")
-    narrator:bindNPC(drNPC, characterDoc, "DrSaysHello")
+    -- connect the villager to your Ink story
+    narrator:bindNPC(myNPC, characterVillager, "VillageIntro")
+    -- narrator:bindNPC(drNPC, characterDoc, "DrSaysHello")
 
     -- distance I can interact at
     interactRange = 80
 
     -- nearbyNPC
     nearbyNPC = nil
+
+    -- opening cutscene before the village appears
+    introActive = true
+    introPage = 1
+
+    -- fonts for the opening cutscene
+    introTitleFont = love.graphics.newFont(24)
+    introBodyFont = love.graphics.newFont(16)
+    introPromptFont = love.graphics.newFont(14)
+
+    -- spacing between lines
+    introBodyFont:setLineHeight(1.2)
+
+    introPages = {
+        [[
+CHAPTER 1: YOUR WORST NIGHTMARE
+
+As you were walking to class at UCSC, you didn’t notice a small rock on the slope and tripped over it.
+
+You rolled downhill at an amazing speed of 35 mph before crashing headfirst into a tree.
+
+The last thing you hear are concerned shrieks from other students near you.
+        ]],
+
+        [[
+When you wake up, you realize that you’re lying in a bed in a rotting, wooden hut.
+        ]],
+
+        [[
+As you drag yourself outside, you discover, from a confused local you’ve randomly grabbed on the road, that you’re in a cultivation world where people train their spiritual energy (qi) in hopes of attaining immortality.
+
+Unfortunately, you have no money, no cultivation, and no idea how to survive.
+
+You must find a way to survive in this unfamiliar world.
+        ]]
+    }
 end
 
 function treeAt(x, y)
@@ -68,6 +106,11 @@ function findNearestNPC()
 end
 
 function love.update(dt)
+    -- don't update gameplay during the opening cutscene
+    if introActive then
+        return
+    end
+
     local dialogOpen = narrator:isOpen()
 
     if not dialogOpen then 
@@ -136,6 +179,19 @@ function drawInteractionPrompt(npc)
 end
 
 function love.keypressed(key)
+    -- opening cutscene controls
+    if introActive then
+        if key == "space" or key == "return" then
+            introPage = introPage + 1
+
+            if introPage > #introPages then
+                introActive = false
+            end
+        end
+
+        return
+    end
+
     if key == "escape" then
         love.event.quit()
     end
@@ -155,6 +211,67 @@ function love.keypressed(key)
 end
 
 function love.draw()
+    -- draw opening cutscene instead of the village
+    if introActive then
+        local w, h = love.graphics.getDimensions()
+
+        love.graphics.clear(0.05, 0.05, 0.08)
+        love.graphics.setColor(1, 1, 1)
+
+        -- chapter title
+        if introPage == 1 then
+            love.graphics.setFont(introTitleFont)
+
+            love.graphics.print(
+                "CHAPTER 1: YOUR WORST NIGHTMARE",
+                60, h * 0.25
+            )
+
+            -- slight bold effect
+            love.graphics.print(
+                "CHAPTER 1: YOUR WORST NIGHTMARE",
+                61, h * 0.25
+            )
+        end
+
+        -- body text
+        love.graphics.setFont(introBodyFont)
+
+        local bodyText = introPages[introPage]
+
+        if introPage == 1 then
+            bodyText = bodyText:gsub(
+                "CHAPTER 1: YOUR WORST NIGHTMARE", ""
+            )
+        end
+
+        -- remove indentation before each line
+        bodyText = bodyText:gsub("\n[ \t]+", "\n")
+        bodyText = bodyText:gsub("^%s+", "")
+        bodyText = bodyText:gsub("%s+$", "")
+
+        love.graphics.printf(
+            bodyText,
+            60,
+            introPage == 1 and h * 0.32 or h * 0.25,
+            w - 120,
+            "left"
+        )
+
+        -- continue prompt
+        love.graphics.setFont(introPromptFont)
+
+        love.graphics.printf(
+            "Press SPACE to continue",
+            0,
+            h - 60,
+            w,
+            "center"
+        )
+
+        return
+    end
+
     cam:attach()
         gameMap:drawLayer(gameMap.layers["Ground"])
         player.anim:draw(player.spriteSpreet, player.x, player.y, nil, 4)
