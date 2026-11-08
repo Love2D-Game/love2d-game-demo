@@ -46,7 +46,8 @@ function love.load()
 
     -- opening cutscene before the village appears
     introActive = true
-    introPage = 1
+    -- page 0 is for AI credits scene
+    introPage = 0
 
     -- fonts for the opening cutscene
     introTitleFont = love.graphics.newFont(24)
@@ -217,6 +218,49 @@ function love.draw()
 
         love.graphics.clear(0.05, 0.05, 0.08)
         love.graphics.setColor(1, 1, 1)
+
+        -- AI credits screen (before Chapter 1)
+        if introPage == 0 then
+            love.graphics.setFont(introTitleFont)
+
+            love.graphics.printf(
+                "CREDITS",
+                0,
+                h * 0.25,
+                w,
+                "center"
+            )
+
+            love.graphics.setFont(introBodyFont)
+
+            love.graphics.printf(
+                "AI-generated artwork was created with the assistance of ChatGPT (OpenAI), including environmental tiles, buildings, and village props.",
+                100,
+                h * 0.40,
+                w - 200,
+                "center"
+            )
+
+            love.graphics.printf(
+                "Super's base model used for walking animations and character base: https://ertylerex.itch.io/top-down-character-base",
+                100,
+                h * 0.55,
+                w - 200,
+                "center"
+            )
+
+            love.graphics.setFont(introPromptFont)
+
+            love.graphics.printf(
+                "Press SPACE to continue",
+                0,
+                h - 60,
+                w,
+                "center"
+            )
+
+            return
+        end
 
         -- chapter title
         if introPage == 1 then
