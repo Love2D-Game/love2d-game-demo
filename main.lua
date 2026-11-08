@@ -5,14 +5,15 @@ function love.load()
     NPC = require 'libraries/npc'
     narrator = require 'libraries/narrator'
 
-    gameMap = sti('maps/testMap.lua')
+    gameMap = sti('maps/village_map.lua')
     cam = camera()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
 
     player = {}
-    player.x = 400
-    player.y = 200
+    -- test to change starting player coordinates
+    player.x = 720
+    player.y = 1200
     player.speed = 4
     player.spriteSpreet = love.graphics.newImage('sprites/main-character-3x4.png')
     player.grid = anim8.newGrid( 19, 30, player.spriteSpreet:getWidth(), player.spriteSpreet:getHeight() )
@@ -26,7 +27,7 @@ function love.load()
     player.anim = player.animations.left
 
     myNPC = NPC.new('sprites/villager.png', 796, 216, 80, 0, 19, 32, 3)
-    drNPC = NPC.new('sprites/player-sheet.png', 804, 1036, 0, 80)
+    -- drNPC = NPC.new('sprites/player-sheet.png', 804, 1036, 0, 80)
 
     -- narrator init
     narrator:init()
@@ -80,13 +81,14 @@ You must find a way to survive in this unfamiliar world.
     }
 end
 
-function treeAt(x, y)
-    local layer = gameMap.layers["Trees"]
-    local tx = math.floor( x / gameMap.tilewidth) + 1
-    local ty = math.floor( y / gameMap.tileheight) + 1
+-- no tree layer for now, everything on one layer
+-- function treeAt(x, y)
+--     local layer = gameMap.layers["Trees"]
+--     local tx = math.floor( x / gameMap.tilewidth) + 1
+--     local ty = math.floor( y / gameMap.tileheight) + 1
 
-    return layer.data[ty] and layer.data[ty][tx]
-end
+--     return layer.data[ty] and layer.data[ty][tx]
+-- end
 
 function findNearestNPC()
     local closest, closestDist = nil, interactRange
@@ -138,9 +140,9 @@ function love.update(dt)
             isMoving = true
         end
 
-        -- collision check
-        if (treeAt(player.x, oldY)) then player.x = oldX end
-        if (treeAt(player.x, player.y)) then player.y = oldY end
+        -- collision check (no tree layers at the moment)
+        -- if (treeAt(player.x, oldY)) then player.x = oldX end
+        -- if (treeAt(player.x, player.y)) then player.y = oldY end
 
         if isMoving then
             player.anim:update(dt)
@@ -161,7 +163,7 @@ function love.update(dt)
     cam.y = math.max( h/2, math.min(cam.y, mapH - h/2))
 
     myNPC:update(dt)
-    drNPC:update(dt)
+    -- drNPC:update(dt)
 
     if dialogOpen then
         nearbyNPC = nil
@@ -271,11 +273,12 @@ function love.draw()
     end
 
     cam:attach()
-        gameMap:drawLayer(gameMap.layers["Ground"])
+        gameMap:drawLayer(gameMap.layers["Tile Layer 1"])
         player.anim:draw(player.spriteSpreet, player.x, player.y, nil, 2.5, 2.5)
         myNPC:draw()
-        drNPC:draw()
-        gameMap:drawLayer(gameMap.layers["Trees"])
+        -- drNPC:draw()
+        -- only have one layer in village_map for now
+        -- gameMap:drawLayer(gameMap.layers["TileLayer1"])
 
         if nearbyNPC then
             drawInteractionPrompt(nearbyNPC)
