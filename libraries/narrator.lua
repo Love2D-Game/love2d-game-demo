@@ -11,8 +11,8 @@
 --   narrator = require 'narrator'
 --   narrator:init()
 --
---   characterBella = narrator:newCharacter("Bella", "sprites/bella_avatar.png")
---   narrator:bindNPC(myNPC, characterBella, "BellaSaysHello")
+--   characterVillager = narrator:newCharacter("Villager", "sprites/villager-avatar.png")
+--   narrator:bindNPC(myNPC, characterVillager, "VillageIntro")
 --
 --   -- in love.update(dt):
 --   narrator:update(dt)

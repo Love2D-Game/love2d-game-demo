@@ -21,13 +21,16 @@ local NPC = {}
 NPC.__index = NPC
 
 --- Create a new NPC.
--- @param spriteSheetPath  path to a 4-column × 4-row sprite sheet
+-- @param spriteSheetPath  path to a 3- or 4-column sprite sheet with 4 rows
 --                         (rows: down, left, right, up — same layout as the player)
 -- @param x               starting x position in the world
 -- @param y               starting y position in the world
 -- @param wanderX         how far (pixels) the NPC can wander left/right from its start
 -- @param wanderY         how far (pixels) the NPC can wander up/down from its start
-function NPC.new(spriteSheetPath, x, y, wanderX, wanderY)
+-- @param frameWidth      frame width in pixels (default 12)
+-- @param frameHeight     frame height in pixels (default 18)
+-- @param scale           sprite draw scale (default 5)
+function NPC.new(spriteSheetPath, x, y, wanderX, wanderY, frameWidth, frameHeight, scale)
     local self = setmetatable({}, NPC)
 
     -- Position
@@ -44,13 +47,19 @@ function NPC.new(spriteSheetPath, x, y, wanderX, wanderY)
     -- Sprite & animation (uses the global anim8 set up in main.lua)
     self.spriteSheet = love.graphics.newImage(spriteSheetPath)
     local imgW, imgH = self.spriteSheet:getDimensions()
-    self.grid = anim8.newGrid(12, 18, imgW, imgH)
+    frameWidth = frameWidth or 12
+    frameHeight = frameHeight or 18
+    self.frameWidth = frameWidth
+    self.frameHeight = frameHeight
+    self.scale = scale or 5
+    self.grid = anim8.newGrid(frameWidth, frameHeight, imgW, imgH)
+    local columns = imgW == frameWidth * 3 and '1-3' or '1-4'
 
     self.animations = {
-        down  = anim8.newAnimation(self.grid('1-4', 1), 0.2),
-        left  = anim8.newAnimation(self.grid('1-4', 2), 0.2),
-        right = anim8.newAnimation(self.grid('1-4', 3), 0.2),
-        up    = anim8.newAnimation(self.grid('1-4', 4), 0.2),
+        down  = anim8.newAnimation(self.grid(columns, 1), 0.2),
+        left  = anim8.newAnimation(self.grid(columns, 2), 0.2),
+        right = anim8.newAnimation(self.grid(columns, 3), 0.2),
+        up    = anim8.newAnimation(self.grid(columns, 4), 0.2),
     }
     self.anim = self.animations.down
 
@@ -120,7 +129,8 @@ end
 
 --- Draw the NPC (call inside cam:attach / cam:detach).
 function NPC:draw()
-    self.anim:draw(self.spriteSheet, self.x, self.y, nil, 5, nil, 6, 9)
+    self.anim:draw(self.spriteSheet, self.x, self.y, nil, self.scale, self.scale,
+        self.frameWidth / 2, self.frameHeight / 2)
 end
 
 return NPC

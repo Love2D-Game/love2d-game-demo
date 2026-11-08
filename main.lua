@@ -14,31 +14,28 @@ function love.load()
     player.x = 400
     player.y = 200
     player.speed = 4
-    player.sprite = love.graphics.newImage('sprites/slug.png')
-    player.spriteSpreet = love.graphics.newImage('sprites/player-sheet.png')
-    player.grid = anim8.newGrid( 12, 18, player.spriteSpreet:getWidth(), player.spriteSpreet:getHeight() )
+    player.spriteSpreet = love.graphics.newImage('sprites/main-character-3x4.png')
+    player.grid = anim8.newGrid( 19, 30, player.spriteSpreet:getWidth(), player.spriteSpreet:getHeight() )
 
     player.animations = {}
-    player.animations.down  = anim8.newAnimation( player.grid('1-4', 1), 0.2)
-    player.animations.left  = anim8.newAnimation( player.grid('1-4', 2), 0.2)
-    player.animations.right = anim8.newAnimation( player.grid('1-4', 3), 0.2)
-    player.animations.up    = anim8.newAnimation( player.grid('1-4', 4), 0.2)
+    player.animations.down  = anim8.newAnimation( player.grid('1-3', 1, 2, 1), 0.16)
+    player.animations.left  = anim8.newAnimation( player.grid('1-3', 2, 2, 2), 0.16)
+    player.animations.right = anim8.newAnimation( player.grid('1-3', 3, 2, 3), 0.16)
+    player.animations.up    = anim8.newAnimation( player.grid('1-3', 4, 2, 4), 0.16)
 
     player.anim = player.animations.left
 
-    myNPC = NPC.new('sprites/player-sheet.png', 796, 216, 80, 0)
+    myNPC = NPC.new('sprites/villager.png', 796, 216, 80, 0, 19, 32, 3)
     drNPC = NPC.new('sprites/player-sheet.png', 804, 1036, 0, 80)
 
     -- narrator init
     narrator:init()
 
     -- create villager character
-    characterVillager = narrator:newCharacter("Villager", "sprites/bella_avatar.png")
-    -- characterDoc = narrator:newCharacter("Doctor", "sprites/doctor_avatar.png")
+    characterVillager = narrator:newCharacter("Villager", "sprites/villager-avatar.png")
 
     -- connect the villager to your Ink story
     narrator:bindNPC(myNPC, characterVillager, "VillageIntro")
-    -- narrator:bindNPC(drNPC, characterDoc, "DrSaysHello")
 
     -- distance I can interact at
     interactRange = 80
@@ -145,11 +142,12 @@ function love.update(dt)
         if (treeAt(player.x, oldY)) then player.x = oldX end
         if (treeAt(player.x, player.y)) then player.y = oldY end
 
-        if isMoving == false then
+        if isMoving then
+            player.anim:update(dt)
+        else
             player.anim:gotoFrame(2)
         end
     end
-    player.anim:update(dt)
 
     cam:lookAt(player.x, player.y)
 
@@ -274,7 +272,7 @@ function love.draw()
 
     cam:attach()
         gameMap:drawLayer(gameMap.layers["Ground"])
-        player.anim:draw(player.spriteSpreet, player.x, player.y, nil, 4)
+        player.anim:draw(player.spriteSpreet, player.x, player.y, nil, 2.5, 2.5)
         myNPC:draw()
         drNPC:draw()
         gameMap:drawLayer(gameMap.layers["Trees"])
