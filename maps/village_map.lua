@@ -9,8 +9,8 @@ return {
   height = 45,
   tilewidth = 32,
   tileheight = 32,
-  nextlayerid = 2,
-  nextobjectid = 1,
+  nextlayerid = 3,
+  nextobjectid = 2,
   properties = {},
   tilesets = {
     {
@@ -73,6 +73,38 @@ return {
     }
   },
   layers = {
+    {
+      type = "objectgroup",
+      name = "Interactions",
+      id = 2,
+      visible = true,
+      opacity = 1,
+      offsetx = 0,
+      offsety = 0,
+      draworder = "topdown",
+      properties = {},
+      objects = {
+        {
+          id = 1,
+          name = "Cave entrance",
+          type = "",
+          shape = "rectangle",
+          x = 900,
+          y = 1100,
+          width = 40,
+          height = 40,
+          rotation = 0,
+          visible = true,
+          properties = {
+            prompt = "E: Enter cave",
+            destination = "cave",
+            range = 80,
+            spawnX = 689.11,
+            spawnY = 1290.47
+          }
+        }
+      }
+    },
     {
       type = "tilelayer",
       x = 0,
