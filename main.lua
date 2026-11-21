@@ -6,6 +6,25 @@ function love.load()
     narrator = require 'libraries/narrator'
 
     gameMap = sti('maps/village_map/village.lua')
+
+    -- load the collision triangles for village map (chatgpt helped code)
+    collisions = {}
+
+    local collisionLayer = gameMap.layers["Collisions"]
+
+    if collisionLayer then
+        for _, obj in ipairs(collisionLayer.objects) do
+            if obj.shape == "rectangle" then
+                table.insert(collisions, {
+                    x = obj.x,
+                    y = obj.y,
+                    width = obj.width,
+                    height = obj.height
+                })
+            end
+        end
+    end
+
     cam = camera()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
@@ -82,14 +101,36 @@ You must find a way to survive in this unfamiliar world.
     }
 end
 
--- no tree layer for now, everything on one layer
--- function treeAt(x, y)
---     local layer = gameMap.layers["Trees"]
---     local tx = math.floor( x / gameMap.tilewidth) + 1
---     local ty = math.floor( y / gameMap.tileheight) + 1
+-- chatgpt helped code --> collision-checking function
+function isBlocked(x, y)
+    -- player collision box near their feet, not the entire sprite
+    local px = x + 12
+    local py = y + 52
+    local pw = 24
+    local ph = 18
 
---     return layer.data[ty] and layer.data[ty][tx]
--- end
+    -- map boundaries
+    local mapW = gameMap.width * gameMap.tilewidth
+    local mapH = gameMap.height * gameMap.tileheight
+
+    -- prevent walking off the map
+    if px < 0 or py < 0 or
+       px + pw > mapW or py + ph > mapH then
+        return true
+    end
+
+    -- check collision with obstacles
+    for _, box in ipairs(collisions) do
+        if px < box.x + box.width and
+           px + pw > box.x and
+           py < box.y + box.height and
+           py + ph > box.y then
+            return true
+        end
+    end
+
+    return false
+end
 
 function findNearestNPC()
     local closest, closestDist = nil, interactRange
@@ -141,9 +182,16 @@ function love.update(dt)
             isMoving = true
         end
 
-        -- collision check (no tree layers at the moment)
-        -- if (treeAt(player.x, oldY)) then player.x = oldX end
-        -- if (treeAt(player.x, player.y)) then player.y = oldY end
+        
+        -- horizontal collision, don't let player move any further
+        if isBlocked(player.x, oldY) then
+            player.x = oldX
+        end
+
+        -- vertical collision
+        if isBlocked(player.x, player.y) then
+            player.y = oldY
+        end
 
         if isMoving then
             player.anim:update(dt)
@@ -160,8 +208,8 @@ function love.update(dt)
     local mapW = gameMap.width * gameMap.tilewidth
     local mapH = gameMap.height * gameMap.tileheight
     -- keep the camera on the screen
-    cam.x = math.max( w/2, math.min(cam.x, mapW - w/2))
-    cam.y = math.max( h/2, math.min(cam.y, mapH - h/2))
+    cam.x = math.max(w/2, math.min(cam.x, mapW - w/2))
+    cam.y = math.max(h/2, math.min(cam.y, mapH - h/2))
 
     myNPC:update(dt)
     -- drNPC:update(dt)
@@ -317,19 +365,31 @@ function love.draw()
     end
 
     cam:attach()
-        -- draw the ground layer
+        -- draw the ground layer first
         gameMap:drawLayer(gameMap.layers["Ground"])
-        player.anim:draw(player.spriteSpreet, player.x, player.y, nil, 2.5, 2.5)
-        -- don't draw the NPCs for now, just the interaction prompt
-        -- myNPC:draw()
-        -- drNPC:draw()
+
         -- draw the objects layer
         gameMap:drawLayer(gameMap.layers["Objects"])
+
+        -- player should be drawn on top of the objects
+        player.anim:draw(
+            player.spriteSpreet,
+            player.x,
+            player.y,
+            nil,
+            2.5,
+            2.5
+        )
+
+        myNPC:draw()
+        -- drNPC:draw()
 
         if nearbyNPC then
             drawInteractionPrompt(nearbyNPC)
         end
+
     cam:detach()
+    
     -- draw scores, health
     love.graphics.print("x = " .. math.floor(player.x) .. " y = " .. math.floor(player.y), 10, 10)
 
