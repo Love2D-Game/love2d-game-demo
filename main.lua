@@ -5,7 +5,7 @@ function love.load()
     NPC = require 'libraries/npc'
     narrator = require 'libraries/narrator'
 
-    gameMap = sti('maps/village_map.lua')
+    gameMap = sti('maps/village.lua')
     cam = camera()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
@@ -317,12 +317,14 @@ function love.draw()
     end
 
     cam:attach()
-        gameMap:drawLayer(gameMap.layers["Tile Layer 1"])
+        -- draw the ground layer
+        gameMap:drawLayer(gameMap.layers["Ground"])
         player.anim:draw(player.spriteSpreet, player.x, player.y, nil, 2.5, 2.5)
-        myNPC:draw()
+        -- don't draw the NPCs for now, just the interaction prompt
+        -- myNPC:draw()
         -- drNPC:draw()
-        -- only have one layer in village_map for now
-        -- gameMap:drawLayer(gameMap.layers["TileLayer1"])
+        -- draw the objects layer
+        gameMap:drawLayer(gameMap.layers["Objects"])
 
         if nearbyNPC then
             drawInteractionPrompt(nearbyNPC)
