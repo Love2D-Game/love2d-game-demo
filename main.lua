@@ -5,7 +5,7 @@ function love.load()
     NPC = require 'libraries/npc'
     narrator = require 'libraries/narrator'
 
-    gameMap = sti('maps/village.lua')
+    gameMap = sti('maps/village_map/village.lua')
     cam = camera()
 
     love.graphics.setDefaultFilter("nearest", "nearest")

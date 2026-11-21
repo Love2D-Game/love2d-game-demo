@@ -196,7 +196,7 @@ return {
       spacing = 0,
       margin = 0,
       columns = 1,
-      image = "bamboo/bamboo.png",
+      image = "bamboo.png",
       imagewidth = 32,
       imageheight = 64,
       objectalignment = "unspecified",
