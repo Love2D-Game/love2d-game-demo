@@ -1,13 +1,21 @@
+local villageMapPath = 'maps/village_map/village.lua'
+local collisions
+
 function love.load()
     camera = require 'libraries/camera'
     anim8 = require 'libraries/anim8'
     sti = require 'libraries/sti'
     NPC = require 'libraries/npc'
     narrator = require 'libraries/narrator'
+    Interactables = require 'libraries/interactables'
+    MapCollision = require 'libraries/map_collision'
 
-    gameMap = sti('maps/village_map/village.lua')
-
-    -- load the collision triangles for village map (chatgpt helped code)
+    currentMapPath = villageMapPath
+    gameMap = sti(currentMapPath)
+    interactables = Interactables.load(gameMap)
+    interactionMessage = nil
+    interactionMessageTimer = 0
+    -- Load the village collision rectangles.
     collisions = {}
 
     local collisionLayer = gameMap.layers["Collisions"]
@@ -68,6 +76,8 @@ function love.load()
     -- page 0 is for AI credits scene
     introPage = 0
 
+    gameOverActive = false
+
     -- fonts for the opening cutscene
     introTitleFont = love.graphics.newFont(24)
     introBodyFont = love.graphics.newFont(16)
@@ -98,11 +108,11 @@ Unfortunately, you have no money, no cultivation, and no idea how to survive.
 
 You must find a way to survive in this unfamiliar world.
         ]]
-    }
+    }   
 end
 
 -- chatgpt helped code --> collision-checking function
-function isBlocked(x, y)
+local function isBlocked(x, y)
     -- player collision box near their feet, not the entire sprite
     local px = x + 12
     local py = y + 52
@@ -133,6 +143,7 @@ function isBlocked(x, y)
 end
 
 function findNearestNPC()
+    if currentMapPath ~= villageMapPath then return nil end
     local closest, closestDist = nil, interactRange
     for _, npc in ipairs(narrator._boundNPCs) do
         local dx = npc.x - player.x
@@ -146,13 +157,37 @@ function findNearestNPC()
     return closest
 end
 
+function interactWithObject(object)
+    local properties = object.properties or {}
+    local destination = properties.destination
+    if destination and destination ~= "" then
+        local path = 'maps/' .. destination .. '.lua'
+        if love.filesystem.getInfo(path, "file") then
+            gameMap = sti(path)
+            currentMapPath = path
+            interactables = Interactables.load(gameMap)
+            player.x = tonumber(properties.spawnX) or gameMap.tilewidth * 2
+            player.y = tonumber(properties.spawnY) or gameMap.tileheight * 2
+            nearbyNPC, nearbyObject = nil, nil
+            interactionMessage = nil
+            return
+        end
+        interactionMessage = "Map not ready: " .. path
+    else
+        interactionMessage = properties.message or properties.dialogue or object.name or "Nothing happens."
+    end
+    interactionMessageTimer = 3
+end
+
 function love.update(dt)
     -- don't update gameplay during the opening cutscene
-    if introActive then
+    if introActive or gameOverActive then
         return
     end
 
     local dialogOpen = narrator:isOpen()
+    interactionMessageTimer = math.max(0, interactionMessageTimer - dt)
+    if interactionMessageTimer == 0 then interactionMessage = nil end
 
     if not dialogOpen then 
         local isMoving = false
@@ -182,15 +217,13 @@ function love.update(dt)
             isMoving = true
         end
 
-        
-        -- horizontal collision, don't let player move any further
-        if isBlocked(player.x, oldY) then
-            player.x = oldX
-        end
-
-        -- vertical collision
-        if isBlocked(player.x, player.y) then
-            player.y = oldY
+        if currentMapPath == villageMapPath then
+            if isBlocked(player.x, oldY) then player.x = oldX end
+            if isBlocked(player.x, player.y) then player.y = oldY end
+        else
+            -- Resolve each axis separately so the player can slide along walls.
+            if not MapCollision.canStand(gameMap, player.x, oldY) then player.x = oldX end
+            if not MapCollision.canStand(gameMap, player.x, player.y) then player.y = oldY end
         end
 
         if isMoving then
@@ -200,7 +233,9 @@ function love.update(dt)
         end
     end
 
-    cam:lookAt(player.x, player.y)
+    -- Player coordinates mark the sprite's top-left; follow its visual center.
+    local frameWidth, frameHeight = player.anim:getDimensions()
+    cam:lookAt(player.x + frameWidth * 2.5 / 2, player.y + frameHeight * 2.5 / 2)
 
     -- clamp the camera so it doesn't scroll off screen
     local w,h = love.graphics.getDimensions()
@@ -211,13 +246,15 @@ function love.update(dt)
     cam.x = math.max(w/2, math.min(cam.x, mapW - w/2))
     cam.y = math.max(h/2, math.min(cam.y, mapH - h/2))
 
-    myNPC:update(dt)
+    if currentMapPath == villageMapPath then myNPC:update(dt) end
     -- drNPC:update(dt)
 
     if dialogOpen then
         nearbyNPC = nil
+        nearbyObject = nil
     else
         nearbyNPC = findNearestNPC()
+        nearbyObject = not nearbyNPC and Interactables.nearest(interactables, player.x, player.y) or nil
     end
     narrator:update(dt)
 end
@@ -241,6 +278,22 @@ function love.keypressed(key)
         return
     end
 
+    if gameOverActive then
+        if key == "return" then
+            love.load()
+            introActive = false
+            elseif key == "escape" then
+                love.event.quit()
+        end
+
+        return
+    end
+
+    if key == "1" and not introActive and not gameOverActive then
+        gameOverActive = true
+        return
+    end
+
     if key == "escape" then
         love.event.quit()
     end
@@ -253,8 +306,14 @@ function love.keypressed(key)
             narrator:nextOption()
         end        
     else
-        if key == "e" and nearbyNPC then
-            narrator:startScript(nearbyNPC)
+        if key == "e" then
+            local npc = findNearestNPC()
+            local object = Interactables.nearest(interactables, player.x, player.y)
+            if npc then
+                narrator:startScript(npc)
+            elseif object then
+                interactWithObject(object)
+            end
         end
     end
 end
@@ -364,34 +423,56 @@ function love.draw()
         return
     end
 
+    if gameOverActive then
+        local width, height = love.graphics.getDimensions()
+        love.graphics.clear(0.35, 0.02, 0.06)
+        love.graphics.setColor(1, 1, 1)
+
+        love.graphics.setFont(introTitleFont)
+        love.graphics.printf("Game Over", 0, height * 0.4, width, "center")
+
+        love.graphics.setFont(introPromptFont)
+        love.graphics.printf("Enter to retry  |  Esc to quit",
+            0, height * 0.5, width, "center")
+        return
+    end
+
     cam:attach()
-        -- draw the ground layer first
-        gameMap:drawLayer(gameMap.layers["Ground"])
-
-        -- draw the objects layer
-        gameMap:drawLayer(gameMap.layers["Objects"])
-
-        -- player should be drawn on top of the objects
-        player.anim:draw(
-            player.spriteSpreet,
-            player.x,
-            player.y,
-            nil,
-            2.5,
-            2.5
-        )
-
-        myNPC:draw()
+        local function drawTiles(layers)
+            for _, layer in ipairs(layers) do
+                if layer.visible ~= false then
+                    if layer.type == "group" then
+                        drawTiles(layer.layers)
+                    elseif layer.type == "tilelayer" or layer.type == "imagelayer" then
+                        gameMap:drawLayer(layer)
+                    end
+                end
+            end
+        end
+        drawTiles(gameMap.layers)
+        player.anim:draw(player.spriteSpreet, player.x, player.y, nil, 2.5, 2.5)
+        if currentMapPath == villageMapPath then myNPC:draw() end
         -- drNPC:draw()
 
         if nearbyNPC then
             drawInteractionPrompt(nearbyNPC)
+        elseif nearbyObject then
+            love.graphics.setColor(1, 1, 1)
+            love.graphics.print((nearbyObject.properties or {}).prompt or ("E: " .. nearbyObject.name),
+                nearbyObject.x, nearbyObject.y - 25)
         end
 
     cam:detach()
-    
+
     -- draw scores, health
     love.graphics.print("x = " .. math.floor(player.x) .. " y = " .. math.floor(player.y), 10, 10)
+    if interactionMessage then
+        local width = love.graphics.getWidth()
+        love.graphics.setColor(0, 0, 0, 0.85)
+        love.graphics.rectangle("fill", 5, 30, width - 10, 105)
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.printf(interactionMessage, 15, 40, width - 30)
+    end
 
     narrator:draw()
 end
