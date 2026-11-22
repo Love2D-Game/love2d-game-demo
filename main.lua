@@ -76,6 +76,16 @@ function love.load()
     -- page 0 is for AI credits scene
     introPage = 0
 
+    -- add main menu settings
+    menuActive = true
+    -- menu selection index (1 means "Start Game" is initialled selected)
+    menuSelection = 1
+
+    menuOptions = {
+        "Start Game",
+        "Quit Game"
+    }
+
     gameOverActive = false
 
     -- fonts for the opening cutscene
@@ -180,6 +190,11 @@ function interactWithObject(object)
 end
 
 function love.update(dt)
+    -- pause game when main menu is active
+    if menuActive then
+        return
+    end
+
     -- don't update gameplay during the opening cutscene
     if introActive or gameOverActive then
         return
@@ -265,6 +280,31 @@ function drawInteractionPrompt(npc)
 end
 
 function love.keypressed(key)
+    -- main menu controls (up/down/enter/space keys)
+    if menuActive then
+        if key == "up" then
+            menuSelection = menuSelection - 1
+            if menuSelection < 1 then
+                menuSelection = #menuOptions
+            end
+        elseif key == "down" then
+            menuSelection = menuSelection + 1
+            if menuSelection > #menuOptions then
+                menuSelection = 1
+            end
+        elseif key == "return" or key == "space" then
+            -- start game so close menu
+            if menuSelection == 1 then
+                menuActive = false
+            -- quit game
+            elseif menuSelection == 2 then
+                love.event.quit()
+            end
+        end
+
+        return
+    end
+
     -- opening cutscene controls
     if introActive then
         if key == "space" or key == "return" then
@@ -319,6 +359,77 @@ function love.keypressed(key)
 end
 
 function love.draw()
+    -- draw main menu if active
+    -- chatgpt helped code this section (especially color design)
+    if menuActive then
+        local w, h = love.graphics.getDimensions()
+
+        -- dark background (can change game theme color later)
+        love.graphics.clear(0.05, 0.07, 0.11)
+
+        -- title
+        love.graphics.setColor(1, 1, 1)
+        love.graphics.setFont(introTitleFont)
+
+        love.graphics.printf(
+            "SURVIVE IN A CULTIVATION WORLD",
+            0,
+            h * 0.25,
+            w,
+            "center"
+        )
+
+        -- subtitle (optional extra thing added, can remove if not needed)
+        love.graphics.setColor(0.75, 0.78, 0.82)
+        love.graphics.setFont(introBodyFont)
+
+        love.graphics.printf(
+            "Your path to immortality begins here. Don't die.",
+            0,
+            h * 0.35,
+            w,
+            "center"
+        )
+
+        -- menu options
+        for i, option in ipairs(menuOptions) do
+            -- chatgpt code this local y variable
+            local y = h * 0.5 + (i - 1) * 55
+
+            if i == menuSelection then
+                -- highlight the selected option (fancy stuff hehe)
+                love.graphics.setColor(0.95, 0.83, 0.55)
+                option = "> " .. option .. " <"
+            else
+                love.graphics.setColor(1, 1, 1)
+            end
+
+            love.graphics.printf(
+                option,
+                0,
+                y,
+                w,
+                "center"
+            )
+        end
+
+        -- controls
+        love.graphics.setColor(0.65, 0.68, 0.72)
+        love.graphics.setFont(introPromptFont)
+
+        love.graphics.printf(
+            "Use UP/DOWN to navigate, ENTER or SPACE to select",
+            0,
+            h - 60,
+            w,
+            "center"
+        )
+
+        love.graphics.setColor(1, 1, 1)
+
+        return
+    end
+
     -- draw opening cutscene instead of the village
     if introActive then
         local w, h = love.graphics.getDimensions()
