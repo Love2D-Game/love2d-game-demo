@@ -1,3 +1,6 @@
+local villageMapPath = 'maps/village_map/village.lua'
+local collisions
+
 function love.load()
     camera = require 'libraries/camera'
     anim8 = require 'libraries/anim8'
@@ -7,11 +10,29 @@ function love.load()
     Interactables = require 'libraries/interactables'
     MapCollision = require 'libraries/map_collision'
 
-    gameMap = sti('maps/village_map.lua')
-    currentMapPath = 'maps/village_map.lua'
+    currentMapPath = villageMapPath
+    gameMap = sti(currentMapPath)
     interactables = Interactables.load(gameMap)
     interactionMessage = nil
     interactionMessageTimer = 0
+    -- Load the village collision rectangles.
+    collisions = {}
+
+    local collisionLayer = gameMap.layers["Collisions"]
+
+    if collisionLayer then
+        for _, obj in ipairs(collisionLayer.objects) do
+            if obj.shape == "rectangle" then
+                table.insert(collisions, {
+                    x = obj.x,
+                    y = obj.y,
+                    width = obj.width,
+                    height = obj.height
+                })
+            end
+        end
+    end
+
     cam = camera()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
@@ -88,17 +109,39 @@ You must find a way to survive in this unfamiliar world.
     }   
 end
 
--- no tree layer for now, everything on one layer
--- function treeAt(x, y)
---     local layer = gameMap.layers["Trees"]
---     local tx = math.floor( x / gameMap.tilewidth) + 1
---     local ty = math.floor( y / gameMap.tileheight) + 1
+-- chatgpt helped code --> collision-checking function
+local function isBlocked(x, y)
+    -- player collision box near their feet, not the entire sprite
+    local px = x + 12
+    local py = y + 52
+    local pw = 24
+    local ph = 18
 
---     return layer.data[ty] and layer.data[ty][tx]
--- end
+    -- map boundaries
+    local mapW = gameMap.width * gameMap.tilewidth
+    local mapH = gameMap.height * gameMap.tileheight
+
+    -- prevent walking off the map
+    if px < 0 or py < 0 or
+       px + pw > mapW or py + ph > mapH then
+        return true
+    end
+
+    -- check collision with obstacles
+    for _, box in ipairs(collisions) do
+        if px < box.x + box.width and
+           px + pw > box.x and
+           py < box.y + box.height and
+           py + ph > box.y then
+            return true
+        end
+    end
+
+    return false
+end
 
 function findNearestNPC()
-    if currentMapPath ~= 'maps/village_map.lua' then return nil end
+    if currentMapPath ~= villageMapPath then return nil end
     local closest, closestDist = nil, interactRange
     for _, npc in ipairs(narrator._boundNPCs) do
         local dx = npc.x - player.x
@@ -172,9 +215,14 @@ function love.update(dt)
             isMoving = true
         end
 
-        -- Resolve each axis separately so the player can slide along walls.
-        if not MapCollision.canStand(gameMap, player.x, oldY) then player.x = oldX end
-        if not MapCollision.canStand(gameMap, player.x, player.y) then player.y = oldY end
+        if currentMapPath == villageMapPath then
+            if isBlocked(player.x, oldY) then player.x = oldX end
+            if isBlocked(player.x, player.y) then player.y = oldY end
+        else
+            -- Resolve each axis separately so the player can slide along walls.
+            if not MapCollision.canStand(gameMap, player.x, oldY) then player.x = oldX end
+            if not MapCollision.canStand(gameMap, player.x, player.y) then player.y = oldY end
+        end
 
         if isMoving then
             player.anim:update(dt)
@@ -193,10 +241,10 @@ function love.update(dt)
     local mapW = gameMap.width * gameMap.tilewidth
     local mapH = gameMap.height * gameMap.tileheight
     -- keep the camera on the screen
-    cam.x = math.max( w/2, math.min(cam.x, mapW - w/2))
-    cam.y = math.max( h/2, math.min(cam.y, mapH - h/2))
+    cam.x = math.max(w/2, math.min(cam.x, mapW - w/2))
+    cam.y = math.max(h/2, math.min(cam.y, mapH - h/2))
 
-    if currentMapPath == 'maps/village_map.lua' then myNPC:update(dt) end
+    if currentMapPath == villageMapPath then myNPC:update(dt) end
     -- drNPC:update(dt)
 
     if dialogOpen then
@@ -371,10 +419,8 @@ function love.draw()
         end
         drawTiles(gameMap.layers)
         player.anim:draw(player.spriteSpreet, player.x, player.y, nil, 2.5, 2.5)
-        if currentMapPath == 'maps/village_map.lua' then myNPC:draw() end
+        if currentMapPath == villageMapPath then myNPC:draw() end
         -- drNPC:draw()
-        -- only have one layer in village_map for now
-        -- gameMap:drawLayer(gameMap.layers["TileLayer1"])
 
         if nearbyNPC then
             drawInteractionPrompt(nearbyNPC)
@@ -383,7 +429,9 @@ function love.draw()
             love.graphics.print((nearbyObject.properties or {}).prompt or ("E: " .. nearbyObject.name),
                 nearbyObject.x, nearbyObject.y - 25)
         end
+
     cam:detach()
+
     -- draw scores, health
     love.graphics.print("x = " .. math.floor(player.x) .. " y = " .. math.floor(player.y), 10, 10)
     if interactionMessage then
