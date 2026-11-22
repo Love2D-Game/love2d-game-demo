@@ -14,9 +14,9 @@ over an entrance, chest, or sign (point objects also work). Add custom propertie
 | `spawnX` / `spawnY` | int | Player position in destination pixels; default 64 for 32px tiles |
 
 Save your editable `.tmx` source and export maps as Lua into `maps/`, with image
-paths relative to that folder. For `destination = cave`, export `maps/cave.lua`.
+paths relative to that folder. For `destination = cave/cave`, export `maps/cave/cave.lua`.
 The game loads the destination's own `Interactions` layer, so add an exit with
-`destination = village_map` and suitable spawn coordinates to return.
+`destination = village_map/village` and suitable spawn coordinates to return.
 NPCs take priority over map objects when both are nearby. Map objects do not
 add collision or artwork; paint their appearance in tile layers.
 
@@ -28,7 +28,7 @@ Recreate this object in your Tiled source before exporting over the village map.
 ## Imported cultivation cave
 
 The cave's editable source is `maps/cave/cave.tmx`, with embedded tilesets.
-Its runtime export is `maps/cave.lua`; export there when updating the map.
+Its runtime export is `maps/cave/cave.lua`; export there when updating the map.
 Both use `maps/cave/scene_tiles.png` and `maps/cave/editor_helpers.png`.
 The TMX includes the runtime collision layer name and village return properties.
 

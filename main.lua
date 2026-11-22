@@ -76,6 +76,8 @@ function love.load()
     -- page 0 is for AI credits scene
     introPage = 0
 
+    gameOverActive = false
+
     -- fonts for the opening cutscene
     introTitleFont = love.graphics.newFont(24)
     introBodyFont = love.graphics.newFont(16)
@@ -179,7 +181,7 @@ end
 
 function love.update(dt)
     -- don't update gameplay during the opening cutscene
-    if introActive then
+    if introActive or gameOverActive then
         return
     end
 
@@ -273,6 +275,22 @@ function love.keypressed(key)
             end
         end
 
+        return
+    end
+
+    if gameOverActive then
+        if key == "return" then
+            love.load()
+            introActive = false
+            elseif key == "escape" then
+                love.event.quit()
+        end
+
+        return
+    end
+
+    if key == "1" and not introActive and not gameOverActive then
+        gameOverActive = true
         return
     end
 
@@ -402,6 +420,20 @@ function love.draw()
             "center"
         )
 
+        return
+    end
+
+    if gameOverActive then
+        local width, height = love.graphics.getDimensions()
+        love.graphics.clear(0.35, 0.02, 0.06)
+        love.graphics.setColor(1, 1, 1)
+
+        love.graphics.setFont(introTitleFont)
+        love.graphics.printf("Game Over", 0, height * 0.4, width, "center")
+
+        love.graphics.setFont(introPromptFont)
+        love.graphics.printf("Enter to retry  |  Esc to quit",
+            0, height * 0.5, width, "center")
         return
     end
 

@@ -271,7 +271,7 @@ return {
           visible = true,
           properties = {
             prompt = "E: Enter cave",
-            destination = "cave",
+            destination = "cave/cave",
             range = 80,
             spawnX = 689.11,
             spawnY = 1290.47

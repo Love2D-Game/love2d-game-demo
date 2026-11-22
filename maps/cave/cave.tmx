@@ -280,7 +280,7 @@
   </object>
   <object id="2" name="CaveExit" type="exit_trigger" x="713.11" y="1417.03">
    <properties>
-    <property name="destination" value="village_map"/>
+    <property name="destination" value="village_map/village"/>
     <property name="dialogue" value="Return to the outer cultivation world."/>
     <property name="interactionRadius" type="float" value="62"/>
     <property name="prompt" value="E: Return to village"/>
