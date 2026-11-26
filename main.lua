@@ -1,6 +1,9 @@
 local villageMapPath = 'maps/village_map/village.lua'
 local collisions
 
+-- load main menu
+local Menu = require('states.menu')
+
 function love.load()
     camera = require 'libraries/camera'
     anim8 = require 'libraries/anim8'
@@ -15,7 +18,8 @@ function love.load()
     interactables = Interactables.load(gameMap)
     interactionMessage = nil
     interactionMessageTimer = 0
-    -- Load the village collision rectangles.
+
+    -- load the village collision rectangles
     collisions = {}
 
     local collisionLayer = gameMap.layers["Collisions"]
@@ -54,7 +58,6 @@ function love.load()
     player.anim = player.animations.left
 
     myNPC = NPC.new('sprites/villager.png', 796, 216, 80, 0, 19, 32, 3)
-    -- drNPC = NPC.new('sprites/player-sheet.png', 804, 1036, 0, 80)
 
     -- narrator init
     narrator:init()
@@ -76,15 +79,8 @@ function love.load()
     -- page 0 is for AI credits scene
     introPage = 0
 
-    -- add main menu settings
+    -- display menu at the very beginning of game
     menuActive = true
-    -- menu selection index (1 means "Start Game" is initialled selected)
-    menuSelection = 1
-
-    menuOptions = {
-        "Start Game",
-        "Quit Game"
-    }
 
     gameOverActive = false
 
@@ -92,6 +88,9 @@ function love.load()
     introTitleFont = love.graphics.newFont(24)
     introBodyFont = love.graphics.newFont(16)
     introPromptFont = love.graphics.newFont(14)
+
+    -- pass fonts into menu.lua for main menu
+    Menu.init(introTitleFont, introBodyFont, introPromptFont)
 
     -- spacing between lines
     introBodyFont:setLineHeight(1.2)
@@ -262,7 +261,6 @@ function love.update(dt)
     cam.y = math.max(h/2, math.min(cam.y, mapH - h/2))
 
     if currentMapPath == villageMapPath then myNPC:update(dt) end
-    -- drNPC:update(dt)
 
     if dialogOpen then
         nearbyNPC = nil
@@ -280,26 +278,14 @@ function drawInteractionPrompt(npc)
 end
 
 function love.keypressed(key)
-    -- main menu controls (up/down/enter/space keys)
+    -- main menu controls
     if menuActive then
-        if key == "up" then
-            menuSelection = menuSelection - 1
-            if menuSelection < 1 then
-                menuSelection = #menuOptions
-            end
-        elseif key == "down" then
-            menuSelection = menuSelection + 1
-            if menuSelection > #menuOptions then
-                menuSelection = 1
-            end
-        elseif key == "return" or key == "space" then
-            -- start game so close menu
-            if menuSelection == 1 then
-                menuActive = false
-            -- quit game
-            elseif menuSelection == 2 then
-                love.event.quit()
-            end
+        local action = Menu.keypressed(key)
+
+        if action == "start" then
+            menuActive = false
+        elseif action == "quit" then
+            love.event.quit()
         end
 
         return
@@ -322,8 +308,8 @@ function love.keypressed(key)
         if key == "return" then
             love.load()
             introActive = false
-            elseif key == "escape" then
-                love.event.quit()
+        elseif key == "escape" then
+            love.event.quit()
         end
 
         return
@@ -337,6 +323,7 @@ function love.keypressed(key)
     if key == "escape" then
         love.event.quit()
     end
+
     if narrator:isOpen() then
         if key == "space" or key == "return" then
             narrator:onAction()
@@ -360,73 +347,8 @@ end
 
 function love.draw()
     -- draw main menu if active
-    -- chatgpt helped code this section (especially color design)
     if menuActive then
-        local w, h = love.graphics.getDimensions()
-
-        -- dark background (can change game theme color later)
-        love.graphics.clear(0.05, 0.07, 0.11)
-
-        -- title
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.setFont(introTitleFont)
-
-        love.graphics.printf(
-            "SURVIVE IN A CULTIVATION WORLD",
-            0,
-            h * 0.25,
-            w,
-            "center"
-        )
-
-        -- subtitle (optional extra thing added, can remove if not needed)
-        love.graphics.setColor(0.75, 0.78, 0.82)
-        love.graphics.setFont(introBodyFont)
-
-        love.graphics.printf(
-            "Your path to immortality begins here. Don't die.",
-            0,
-            h * 0.35,
-            w,
-            "center"
-        )
-
-        -- menu options
-        for i, option in ipairs(menuOptions) do
-            -- chatgpt code this local y variable
-            local y = h * 0.5 + (i - 1) * 55
-
-            if i == menuSelection then
-                -- highlight the selected option (fancy stuff hehe)
-                love.graphics.setColor(0.95, 0.83, 0.55)
-                option = "> " .. option .. " <"
-            else
-                love.graphics.setColor(1, 1, 1)
-            end
-
-            love.graphics.printf(
-                option,
-                0,
-                y,
-                w,
-                "center"
-            )
-        end
-
-        -- controls
-        love.graphics.setColor(0.65, 0.68, 0.72)
-        love.graphics.setFont(introPromptFont)
-
-        love.graphics.printf(
-            "Use UP/DOWN to navigate, ENTER or SPACE to select",
-            0,
-            h - 60,
-            w,
-            "center"
-        )
-
-        love.graphics.setColor(1, 1, 1)
-
+        Menu.draw()
         return
     end
 
