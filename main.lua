@@ -4,6 +4,7 @@ local collisions
 -- load state files
 local Menu = require('states.menu')
 local GameOver = require('states.gameover')
+local Intro = require('states.intro')
 
 function love.load()
     camera = require 'libraries/camera'
@@ -75,14 +76,9 @@ function love.load()
     -- nearbyNPC
     nearbyNPC = nil
 
-    -- opening cutscene before the village appears
-    introActive = true
-    -- page 0 is for AI credits scene
-    introPage = 0
-
-    -- display menu at the very beginning of game
+    -- screen states
     menuActive = true
-
+    introActive = true
     gameOverActive = false
 
     -- fonts for the opening cutscene
@@ -93,33 +89,7 @@ function love.load()
     -- pass fonts into state files for use in drawing text
     Menu.init(introTitleFont, introBodyFont, introPromptFont)
     GameOver.init(introTitleFont, introPromptFont)
-
-    -- spacing between lines
-    introBodyFont:setLineHeight(1.2)
-
-    introPages = {
-        [[
-CHAPTER 1: YOUR WORST NIGHTMARE
-
-As you were walking to class at UCSC, you didn’t notice a small rock on the slope and tripped over it.
-
-You rolled downhill at an amazing speed of 35 mph before crashing headfirst into a tree.
-
-The last thing you hear are concerned shrieks from other students near you.
-        ]],
-
-        [[
-When you wake up, you realize that you’re lying in a bed in a rotting, wooden hut.
-        ]],
-
-        [[
-As you drag yourself outside, you discover, from a confused local you’ve randomly grabbed on the road, that you’re in a cultivation world where people train their spiritual energy (qi) in hopes of attaining immortality.
-
-Unfortunately, you have no money, no cultivation, and no idea how to survive.
-
-You must find a way to survive in this unfamiliar world.
-        ]]
-    }   
+    Intro.init(introTitleFont, introBodyFont, introPromptFont)
 end
 
 -- chatgpt helped code --> collision-checking function
@@ -203,7 +173,9 @@ function love.update(dt)
 
     local dialogOpen = narrator:isOpen()
     interactionMessageTimer = math.max(0, interactionMessageTimer - dt)
-    if interactionMessageTimer == 0 then interactionMessage = nil end
+    if interactionMessageTimer == 0 then
+        interactionMessage = nil
+    end
 
     if not dialogOpen then 
         local isMoving = false
@@ -295,12 +267,10 @@ function love.keypressed(key)
 
     -- opening cutscene controls
     if introActive then
-        if key == "space" or key == "return" then
-            introPage = introPage + 1
+        local action = Intro.keypressed(key)
 
-            if introPage > #introPages then
-                introActive = false
-            end
+        if action == "finished" then
+            introActive = false
         end
 
         return
@@ -321,6 +291,7 @@ function love.keypressed(key)
         return
     end
 
+    -- this is temporary death trigger
     if key == "1" and not introActive and not gameOverActive then
         gameOverActive = true
         return
@@ -358,115 +329,19 @@ function love.draw()
         return
     end
 
-    -- draw opening cutscene instead of the village
+    -- draw opening cutscene
     if introActive then
-        local w, h = love.graphics.getDimensions()
-
-        love.graphics.clear(0.05, 0.05, 0.08)
-        love.graphics.setColor(1, 1, 1)
-
-        -- AI credits screen (before Chapter 1)
-        if introPage == 0 then
-            love.graphics.setFont(introTitleFont)
-
-            love.graphics.printf(
-                "CREDITS",
-                0,
-                h * 0.25,
-                w,
-                "center"
-            )
-
-            love.graphics.setFont(introBodyFont)
-
-            love.graphics.printf(
-                "AI-generated artwork was created with the assistance of ChatGPT (OpenAI), including environmental tiles, buildings, and village props.",
-                100,
-                h * 0.40,
-                w - 200,
-                "center"
-            )
-
-            love.graphics.printf(
-                "Super's base model used for walking animations and character base: https://ertylerex.itch.io/top-down-character-base",
-                100,
-                h * 0.55,
-                w - 200,
-                "center"
-            )
-
-            love.graphics.setFont(introPromptFont)
-
-            love.graphics.printf(
-                "Press SPACE to continue",
-                0,
-                h - 60,
-                w,
-                "center"
-            )
-
-            return
-        end
-
-        -- chapter title
-        if introPage == 1 then
-            love.graphics.setFont(introTitleFont)
-
-            love.graphics.print(
-                "CHAPTER 1: YOUR WORST NIGHTMARE",
-                60, h * 0.25
-            )
-
-            -- slight bold effect
-            love.graphics.print(
-                "CHAPTER 1: YOUR WORST NIGHTMARE",
-                61, h * 0.25
-            )
-        end
-
-        -- body text
-        love.graphics.setFont(introBodyFont)
-
-        local bodyText = introPages[introPage]
-
-        if introPage == 1 then
-            bodyText = bodyText:gsub(
-                "CHAPTER 1: YOUR WORST NIGHTMARE", ""
-            )
-        end
-
-        -- remove indentation before each line
-        bodyText = bodyText:gsub("\n[ \t]+", "\n")
-        bodyText = bodyText:gsub("^%s+", "")
-        bodyText = bodyText:gsub("%s+$", "")
-
-        love.graphics.printf(
-            bodyText,
-            60,
-            introPage == 1 and h * 0.32 or h * 0.25,
-            w - 120,
-            "left"
-        )
-
-        -- continue prompt
-        love.graphics.setFont(introPromptFont)
-
-        love.graphics.printf(
-            "Press SPACE to continue",
-            0,
-            h - 60,
-            w,
-            "center"
-        )
-
+        Intro.draw()
         return
     end
 
+    -- draw game over
     if gameOverActive then
         GameOver.draw()
         return
     end
 
+    -- village/other gameplay maps
     cam:attach()
         local function drawTiles(layers)
             for _, layer in ipairs(layers) do
