@@ -9,8 +9,8 @@ return {
   height = 45,
   tilewidth = 32,
   tileheight = 32,
-  nextlayerid = 7,
-  nextobjectid = 145,
+  nextlayerid = 8,
+  nextobjectid = 146,
   properties = {},
   tilesets = {
     {
@@ -276,6 +276,25 @@ return {
             spawnX = 689.11,
             spawnY = 1290.47
           }
+        },
+        {
+          id = 145,
+          name = "Sect Temple entrance",
+          type = "",
+          shape = "point",
+          x = 328,
+          y = 1100,
+          width = 0,
+          height = 0,
+          rotation = 0,
+          visible = true,
+          properties = {
+            prompt = "E: Enter Sect Temple",
+            destination = "sect_temple/temple",
+            range = 80,
+            spawnX = 696,
+            spawnY = 1170
+          }
         }
       }
     },
@@ -408,6 +427,17 @@ return {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
       }
+    },
+    {
+      type = "imagelayer",
+      id = 7,
+      name = "Cave Entrance Artwork",
+      visible = true,
+      opacity = 1,
+      offsetx = 864,
+      offsety = 1038,
+      image = "cave_entrance.png",
+      properties = {}
     },
     {
       type = "objectgroup",

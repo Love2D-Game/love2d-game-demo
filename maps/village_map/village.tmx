@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="45" height="45" tilewidth="32" tileheight="32" infinite="0" nextlayerid="6" nextobjectid="146">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="45" height="45" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="146">
  <editorsettings>
   <export target="village_updated.lua" format="lua"/>
  </editorsettings>
@@ -125,6 +125,9 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <imagelayer id="7" name="Cave Entrance Artwork" offsetx="864" offsety="1038">
+  <image source="cave_entrance.png" width="112" height="90"/>
+ </imagelayer>
  <objectgroup id="5" name="Collisions">
   <object id="9" x="64" y="32" width="64" height="64"/>
   <object id="11" x="32" y="160" width="32" height="64"/>
