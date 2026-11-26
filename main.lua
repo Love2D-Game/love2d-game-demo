@@ -1,8 +1,9 @@
 local villageMapPath = 'maps/village_map/village.lua'
 local collisions
 
--- load main menu
+-- load state files
 local Menu = require('states.menu')
+local GameOver = require('states.gameover')
 
 function love.load()
     camera = require 'libraries/camera'
@@ -89,8 +90,9 @@ function love.load()
     introBodyFont = love.graphics.newFont(16)
     introPromptFont = love.graphics.newFont(14)
 
-    -- pass fonts into menu.lua for main menu
+    -- pass fonts into state files for use in drawing text
     Menu.init(introTitleFont, introBodyFont, introPromptFont)
+    GameOver.init(introTitleFont, introPromptFont)
 
     -- spacing between lines
     introBodyFont:setLineHeight(1.2)
@@ -305,10 +307,14 @@ function love.keypressed(key)
     end
 
     if gameOverActive then
-        if key == "return" then
+        local action = GameOver.keypressed(key)
+
+        if action == "menu" then
+            -- reset game and return to main menu
             love.load()
             introActive = false
-        elseif key == "escape" then
+
+        elseif action == "quit" then
             love.event.quit()
         end
 
@@ -457,16 +463,7 @@ function love.draw()
     end
 
     if gameOverActive then
-        local width, height = love.graphics.getDimensions()
-        love.graphics.clear(0.35, 0.02, 0.06)
-        love.graphics.setColor(1, 1, 1)
-
-        love.graphics.setFont(introTitleFont)
-        love.graphics.printf("Game Over", 0, height * 0.4, width, "center")
-
-        love.graphics.setFont(introPromptFont)
-        love.graphics.printf("Enter to retry  |  Esc to quit",
-            0, height * 0.5, width, "center")
+        GameOver.draw()
         return
     end
 
