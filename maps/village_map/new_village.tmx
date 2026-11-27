@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="45" height="45" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="165">
  <editorsettings>
-  <export target="village.lua" format="lua"/>
+  <export target="new_village.lua" format="lua"/>
  </editorsettings>
  <tileset firstgid="1" name="tiles" tilewidth="32" tileheight="32" tilecount="1536" columns="48">
   <image source="final.tiff" width="1536" height="1024"/>
@@ -234,7 +234,7 @@
   <object id="142" x="1088" y="896" width="64" height="96"/>
   <object id="164" x="800" y="1024" width="32" height="32"/>
  </objectgroup>
- <objectgroup id="7" name="Interactables" locked="1">
+ <objectgroup id="7" name="Interactions" locked="1">
   <object id="158" name="QiPool" x="32" y="32" width="128" height="96">
    <properties>
     <property name="message" value="The pool radiates immense amounts of spiritual energy, but something prevents you from using it to cultivate."/>

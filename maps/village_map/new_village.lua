@@ -1895,7 +1895,7 @@ return {
       type = "objectgroup",
       draworder = "topdown",
       id = 7,
-      name = "Interactables",
+      name = "Interactions",
       class = "",
       visible = true,
       opacity = 1,
