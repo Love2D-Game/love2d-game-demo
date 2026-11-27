@@ -11,6 +11,7 @@ local Player = require('systems.player')
 local Collision = require('systems.collision')
 local Map = require('systems.map')
 local Interactions = require('systems.interactions')
+local UI = require('systems.ui_style')
 
 function love.load()
     camera = require 'libraries/camera'
@@ -37,6 +38,8 @@ function love.load()
     cam = camera()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
+
+    UI.init()
 
     -- create player and load animations
     player = Player.load(anim8)
@@ -186,8 +189,12 @@ function love.update(dt)
 end
 
 function drawInteractionPrompt(npc)
-    love.graphics.setColor(1,1,1)
-    love.graphics.print("Press E", npc.x - 25, npc.y - 25)
+    UI.drawPrompt("E: Talk", {
+        x = npc.x - 20,
+        y = npc.y,
+        width = 40,
+        height = 0
+    })
 end
 
 function love.keypressed(key)
@@ -304,38 +311,18 @@ function love.draw()
         if nearbyNPC then
             drawInteractionPrompt(nearbyNPC)
         elseif nearbyObject then
-            love.graphics.setColor(1, 1, 1)
+            local promptText =
+                (nearbyObject.properties or {}).prompt
+                or ("E: " .. nearbyObject.name)
 
-            -- positioning of prompt helped by chatgpt
-            local promptText = (nearbyObject.properties or {}).prompt or ("E: " .. nearbyObject.name)
-            local objW = nearbyObject.width or 0
-            local objH = nearbyObject.height or 0
-
-            -- center prompt over interactable box
-            local promptWidth = 220
-            local promptX = nearbyObject.x + objW / 2 - promptWidth / 2
-            local promptY = nearbyObject.y - 8   -- smaller negative = closer
-
-            love.graphics.printf(promptText, promptX, promptY, promptWidth, "center")
+            UI.drawPrompt(promptText, nearbyObject)
         end
 
     cam:detach()
 
     -- draw scores, health
     love.graphics.print("x = " .. math.floor(player.x) .. " y = " .. math.floor(player.y), 10, 10)
-    if interactionMessage then
-        -- positioning of message box helped by chatgpt
-        local width = love.graphics.getWidth()
-        local height = love.graphics.getHeight()
-        local boxHeight = 105
-        local boxY = height - boxHeight - 10
-
-        love.graphics.setColor(0, 0, 0, 0.85)
-        love.graphics.rectangle("fill", 5, boxY, width - 10, boxHeight)
-
-        love.graphics.setColor(1, 1, 1)
-        love.graphics.printf(interactionMessage, 15, boxY + 10, width - 30)
-    end
+    UI.drawMessage(interactionMessage)
 
     narrator:draw()
 end

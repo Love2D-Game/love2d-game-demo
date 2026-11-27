@@ -28,6 +28,9 @@
 
 local narrator = {}
 
+-- same styling as systems/ui_style.lua
+local UI = require('systems.ui_style')
+
 -- Forward declarations
 local Talkies
 local NarratorLib
@@ -65,10 +68,22 @@ function narrator:init()
 
     -- A few sensible defaults for the dialog box. Users can tweak these
     -- after init by reaching into `Talkies` directly.
-    Talkies.font      = love.graphics.newFont(16)
-    Talkies.padding   = 12
-    Talkies.rounding  = 4
-    Talkies.thickness = 2
+    
+    -- use same design as village interaction messages
+    Talkies.font = UI.font
+    Talkies.padding = UI.padding
+    Talkies.rounding = UI.rounding
+    Talkies.thickness = UI.borderWidth
+
+    Talkies.messageBackgroundColor = UI.background
+    Talkies.messageBorderColor = UI.border
+    Talkies.messageColor = UI.textColor
+
+    Talkies.titleBackgroundColor = UI.background
+    Talkies.titleBorderColor = UI.border
+    Talkies.titleColor = UI.titleColor
+
+    Talkies.height = 210
 
     -- Track which NPCs are currently bound so we can iterate them later.
     self._boundNPCs = {}

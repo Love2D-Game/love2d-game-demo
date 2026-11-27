@@ -282,15 +282,36 @@ function Talkies.draw()
   local boxX = currentDialog.padding
   local boxY = windowHeight-(boxH+currentDialog.padding)
 
-  -- image
-  local imgX, imgY, imgW, imgScale = boxX+currentDialog.padding, boxY+currentDialog.padding, 0, 0
+  -- image (edited to match systems/ui_style.lua)
+  -- code helped by ChatGPT
+  local imgX = boxX + currentDialog.padding
+  local imgY = boxY + currentDialog.padding
+  local imgW = 0
+  local imgScale = 0
+
   if currentDialog.image ~= nil then
-    imgScale = (boxH - (currentDialog.padding * 2)) / currentDialog.image:getHeight()
-    imgW = currentDialog.image:getWidth() * imgScale
+      local imageW = currentDialog.image:getWidth()
+      local imageH = currentDialog.image:getHeight()
+
+      -- keep portrait smaller than dialogue box
+      local maxPortraitW = 140
+      local maxPortraitH = 150
+
+      imgScale = math.min(
+          maxPortraitW / imageW,
+          maxPortraitH / imageH
+      )
+
+      imgW = imageW * imgScale
+      local imgH = imageH * imgScale
+
+      -- center portrait vertically inside box
+      imgY = boxY + (boxH - imgH) / 2
   end
 
   -- title box
-  local textX, textY = imgX + imgW + currentDialog.padding, boxY + 4
+  local textX = imgX + imgW + currentDialog.padding
+  local textY = boxY + currentDialog.padding
 
   love.graphics.setFont(currentDialog.font)
 
@@ -298,7 +319,8 @@ function Talkies.draw()
     local titleBoxW = currentDialog.font:getWidth(currentDialog.title)+(2*currentDialog.padding)
     local titleBoxH = currentDialog.fontHeight+currentDialog.padding
     local titleBoxY = boxY-titleBoxH-(currentDialog.padding/2)
-    local titleX, titleY = boxX + currentDialog.padding, titleBoxY + 2
+    local titleX = boxX + (titleBoxW - currentDialog.font:getWidth(currentDialog.title)) / 2
+    local titleY = titleBoxY + (titleBoxH - currentDialog.fontHeight) / 2
     
     -- Message title
     love.graphics.setColor(currentDialog.titleBackgroundColor)
@@ -330,7 +352,7 @@ function Talkies.draw()
   -- Message text
   love.graphics.setColor(currentDialog.messageColor)
   local textW = boxW - imgW - (4 * currentDialog.padding)
-  local textH = currentDialog.font:getHeight()
+  local textH = currentDialog.font:getHeight() * 1.25
   
   local _, modmsg = currentDialog.font:getWrap(currentMessage.msg, textW)
   
@@ -354,14 +376,42 @@ function Talkies.draw()
   if currentDialog:showOptions() and currentMessage.complete then
     if currentDialog.inlineOptions then
       local optionsY = textY + currentDialog.font:getHeight() * #modmsg
-      local optionLeftPad = currentDialog.font:getWidth(currentDialog.optionCharacter.." ")
-      for k, option in pairs(currentDialog.options) do
-        love.graphics.print(option[1], optionLeftPad+textX+currentDialog.padding, optionsY+((k-1)*currentDialog.fontHeight))
+
+      local optionsX = textX + currentDialog.padding
+
+      local availableWidth =
+          boxX + boxW - currentDialog.padding - optionsX
+
+      local lineHeight = currentDialog.font:getHeight()
+
+      for k, option in ipairs(currentDialog.options) do
+        -- show indicator beside the selected choice
+        local prefix = "  "
+
+        if k == currentDialog.optionIndex then
+            prefix = currentDialog.optionCharacter .. " "
+        end
+
+        local optionText = prefix .. option[1]
+
+        -- auto wrap long choices
+        love.graphics.printf(
+            optionText,
+            optionsX,
+            optionsY,
+            availableWidth,
+            "left"
+        )
+
+        -- move down by actual number of wrapped lines
+        local _, wrappedLines =
+            currentDialog.font:getWrap(
+                optionText,
+                availableWidth
+            )
+
+        optionsY = optionsY + lineHeight * #wrappedLines + 4
       end
-      love.graphics.print(
-        currentDialog.optionCharacter.." ",
-        textX+currentDialog.padding,
-        optionsY+((currentDialog.optionIndex-1)*currentDialog.fontHeight))
     else
       local optionWidth = 0
       
