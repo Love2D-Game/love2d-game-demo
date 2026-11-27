@@ -1,5 +1,4 @@
 local villageMapPath = 'maps/village_map/village.lua'
-local collisions
 
 -- load state files
 local Menu = require('states.menu')
@@ -8,6 +7,7 @@ local Intro = require('states.intro')
 
 -- load systems files
 local Player = require('systems.player')
+local Collision = require('systems.collision')
 
 function love.load()
     camera = require 'libraries/camera'
@@ -16,7 +16,6 @@ function love.load()
     NPC = require 'libraries/npc'
     narrator = require 'libraries/narrator'
     Interactables = require 'libraries/interactables'
-    MapCollision = require 'libraries/map_collision'
 
     currentMapPath = villageMapPath
     gameMap = sti(currentMapPath)
@@ -24,23 +23,8 @@ function love.load()
     interactionMessage = nil
     interactionMessageTimer = 0
 
-    -- load the village collision rectangles
-    collisions = {}
-
-    local collisionLayer = gameMap.layers["Collisions"]
-
-    if collisionLayer then
-        for _, obj in ipairs(collisionLayer.objects) do
-            if obj.shape == "rectangle" then
-                table.insert(collisions, {
-                    x = obj.x,
-                    y = obj.y,
-                    width = obj.width,
-                    height = obj.height
-                })
-            end
-        end
-    end
+    -- load collision rectangles from village map
+    Collision.loadVillage(gameMap)
 
     cam = camera()
 
@@ -80,37 +64,6 @@ function love.load()
     Menu.init(introTitleFont, introBodyFont, introPromptFont)
     GameOver.init(introTitleFont, introPromptFont)
     Intro.init(introTitleFont, introBodyFont, introPromptFont)
-end
-
--- chatgpt helped code --> collision-checking function
-local function isBlocked(x, y)
-    -- player collision box near their feet, not the entire sprite
-    local px = x + 12
-    local py = y + 52
-    local pw = 24
-    local ph = 18
-
-    -- map boundaries
-    local mapW = gameMap.width * gameMap.tilewidth
-    local mapH = gameMap.height * gameMap.tileheight
-
-    -- prevent walking off the map
-    if px < 0 or py < 0 or
-       px + pw > mapW or py + ph > mapH then
-        return true
-    end
-
-    -- check collision with obstacles
-    for _, box in ipairs(collisions) do
-        if px < box.x + box.width and
-           px + pw > box.x and
-           py < box.y + box.height and
-           py + ph > box.y then
-            return true
-        end
-    end
-
-    return false
 end
 
 function findNearestNPC()
@@ -169,23 +122,14 @@ function love.update(dt)
 
     if not dialogOpen then
         Player.update(player, dt, function(x, y)
-
-        -- village uses the collision rectangles
-        -- loaded from Tiled
-        if currentMapPath == villageMapPath then
-            return isBlocked(x, y)
-
-        -- other maps use the shared collision library
-        else
-            return not MapCollision.canStand(
+            return Collision.isBlocked(
                 gameMap,
+                currentMapPath,
+                villageMapPath,
                 x,
                 y
             )
-        end
-
         end)
-
     end
 
     -- Player coordinates mark the sprite's top-left; follow its visual center.
@@ -321,7 +265,7 @@ function love.draw()
                 end
             end
         end
-        
+
         drawTiles(gameMap.layers)
         Player.draw(player)
         if currentMapPath == villageMapPath then myNPC:draw() end
