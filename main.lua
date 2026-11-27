@@ -8,23 +8,26 @@ local Intro = require('states.intro')
 -- load systems files
 local Player = require('systems.player')
 local Collision = require('systems.collision')
+local Map = require('systems.map')
 
 function love.load()
     camera = require 'libraries/camera'
     anim8 = require 'libraries/anim8'
-    sti = require 'libraries/sti'
     NPC = require 'libraries/npc'
     narrator = require 'libraries/narrator'
     Interactables = require 'libraries/interactables'
 
+    -- start in the village map
     currentMapPath = villageMapPath
-    gameMap = sti(currentMapPath)
-    interactables = Interactables.load(gameMap)
+
+    -- load map, interactables, and village collisions
+    gameMap, interactables = Map.load(
+        currentMapPath,
+        villageMapPath
+    )
+
     interactionMessage = nil
     interactionMessageTimer = 0
-
-    -- load collision rectangles from village map
-    Collision.loadVillage(gameMap)
 
     cam = camera()
 
@@ -82,24 +85,29 @@ function findNearestNPC()
 end
 
 function interactWithObject(object)
-    local properties = object.properties or {}
-    local destination = properties.destination
-    if destination and destination ~= "" then
-        local path = 'maps/' .. destination .. '.lua'
-        if love.filesystem.getInfo(path, "file") then
-            gameMap = sti(path)
-            currentMapPath = path
-            interactables = Interactables.load(gameMap)
-            player.x = tonumber(properties.spawnX) or gameMap.tilewidth * 2
-            player.y = tonumber(properties.spawnY) or gameMap.tileheight * 2
-            nearbyNPC, nearbyObject = nil, nil
-            interactionMessage = nil
-            return
-        end
-        interactionMessage = "Map not ready: " .. path
-    else
-        interactionMessage = properties.message or properties.dialogue or object.name or "Nothing happens."
+    local result = Map.interact(
+        object,
+        player,
+        villageMapPath
+    )
+
+    -- if object sends us to another map
+    if result.map then
+
+        gameMap = result.map
+        currentMapPath = result.path
+        interactables = result.interactables
+
+        -- clear nearby interactions from previous map
+        nearbyNPC = nil
+        nearbyObject = nil
+        interactionMessage = nil
+
+        return
     end
+
+    -- otherwise display the object's message
+    interactionMessage = result.message
     interactionMessageTimer = 3
 end
 
