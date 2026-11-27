@@ -36,7 +36,7 @@ function love.load()
     -- create player and load animations
     player = Player.load(anim8)
 
-    myNPC = NPC.new('sprites/villager.png', 796, 216, 80, 0, 19, 32, 3)
+    myNPC = NPC.new('sprites/villager.png', 856, 332, 80, 0, 19, 32, 3)
 
     -- narrator init
     narrator:init()
