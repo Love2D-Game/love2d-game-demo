@@ -1,4 +1,5 @@
-local villageMapPath = 'maps/village_map/village.lua'
+-- switch back to main village.lua after new_village.lua gets cave integrated with it
+local villageMapPath = 'maps/village_map/new_village.lua'
 
 -- load state files
 local Menu = require('states.menu')
@@ -276,7 +277,10 @@ function love.draw()
 
         drawTiles(gameMap.layers)
         Player.draw(player)
-        if currentMapPath == villageMapPath then myNPC:draw() end
+        
+        if currentMapPath == villageMapPath then
+            myNPC:draw()
+        end
 
         if nearbyNPC then
             drawInteractionPrompt(nearbyNPC)
