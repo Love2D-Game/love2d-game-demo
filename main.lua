@@ -6,6 +6,9 @@ local Menu = require('states.menu')
 local GameOver = require('states.gameover')
 local Intro = require('states.intro')
 
+-- load systems files
+local Player = require('systems.player')
+
 function love.load()
     camera = require 'libraries/camera'
     anim8 = require 'libraries/anim8'
@@ -43,21 +46,8 @@ function love.load()
 
     love.graphics.setDefaultFilter("nearest", "nearest")
 
-    player = {}
-    -- test to change starting player coordinates
-    player.x = 720
-    player.y = 1200
-    player.speed = 4
-    player.spriteSpreet = love.graphics.newImage('sprites/main-character-3x4.png')
-    player.grid = anim8.newGrid( 19, 30, player.spriteSpreet:getWidth(), player.spriteSpreet:getHeight() )
-
-    player.animations = {}
-    player.animations.down  = anim8.newAnimation( player.grid('1-3', 1, 2, 1), 0.16)
-    player.animations.left  = anim8.newAnimation( player.grid('1-3', 2, 2, 2), 0.16)
-    player.animations.right = anim8.newAnimation( player.grid('1-3', 3, 2, 3), 0.16)
-    player.animations.up    = anim8.newAnimation( player.grid('1-3', 4, 2, 4), 0.16)
-
-    player.anim = player.animations.left
+    -- create player and load animations
+    player = Player.load(anim8)
 
     myNPC = NPC.new('sprites/villager.png', 796, 216, 80, 0, 19, 32, 3)
 
@@ -177,48 +167,25 @@ function love.update(dt)
         interactionMessage = nil
     end
 
-    if not dialogOpen then 
-        local isMoving = false
-        local oldX, oldY = player.x, player.y
+    if not dialogOpen then
+        Player.update(player, dt, function(x, y)
 
-        if love.keyboard.isDown("right") then
-            player.x = player.x + player.speed
-            player.anim = player.animations.right
-            isMoving = true
-        end
-
-        if love.keyboard.isDown("left") then
-            player.x = player.x - player.speed
-            player.anim = player.animations.left
-            isMoving = true
-        end
-
-        if love.keyboard.isDown("down") then
-            player.y = player.y + player.speed
-            player.anim = player.animations.down
-            isMoving = true
-        end
-
-        if love.keyboard.isDown("up") then
-            player.y = player.y - player.speed
-            player.anim = player.animations.up
-            isMoving = true
-        end
-
+        -- village uses the collision rectangles
+        -- loaded from Tiled
         if currentMapPath == villageMapPath then
-            if isBlocked(player.x, oldY) then player.x = oldX end
-            if isBlocked(player.x, player.y) then player.y = oldY end
+            return isBlocked(x, y)
+
+        -- other maps use the shared collision library
         else
-            -- Resolve each axis separately so the player can slide along walls.
-            if not MapCollision.canStand(gameMap, player.x, oldY) then player.x = oldX end
-            if not MapCollision.canStand(gameMap, player.x, player.y) then player.y = oldY end
+            return not MapCollision.canStand(
+                gameMap,
+                x,
+                y
+            )
         end
 
-        if isMoving then
-            player.anim:update(dt)
-        else
-            player.anim:gotoFrame(2)
-        end
+        end)
+
     end
 
     -- Player coordinates mark the sprite's top-left; follow its visual center.
@@ -354,10 +321,10 @@ function love.draw()
                 end
             end
         end
+        
         drawTiles(gameMap.layers)
-        player.anim:draw(player.spriteSpreet, player.x, player.y, nil, 2.5, 2.5)
+        Player.draw(player)
         if currentMapPath == villageMapPath then myNPC:draw() end
-        -- drNPC:draw()
 
         if nearbyNPC then
             drawInteractionPrompt(nearbyNPC)
