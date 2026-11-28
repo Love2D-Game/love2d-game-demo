@@ -366,11 +366,11 @@ return {
           opacity = 1,
           visible = true,
           properties = {
-            ["destination"] = "village_map/village",
+            ["destination"] = "village_map/new_village",
             ["prompt"] = "E: Return to village",
             ["range"] = 80,
-            ["spawnX"] = 328,
-            ["spawnY"] = 1100
+            ["spawnX"] = 728,
+            ["spawnY"] = 1328
           }
         },
         {

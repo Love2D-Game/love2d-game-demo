@@ -271,8 +271,10 @@
   </object>
   <object id="163" name="GetLost" x="704" y="1408" width="96" height="32">
    <properties>
-    <property name="message" value="The village is surrounded by tall, shadowed trees. Outside, it looks dark and creepy. You spot large vultures perched on top of the trees staring at you."/>
-    <property name="prompt" value="E: Leave the village to explore into the unknown."/>
+    <property name="destination" value="sect_temple/temple"/>
+    <property name="prompt" value="E: Enter Sect Temple"/>
+    <property name="spawnX" type="int" value="696"/>
+    <property name="spawnY" type="int" value="1170"/>
    </properties>
   </object>
   <object id="151" name="Cave Entrance" x="300" y="1132" width="32" height="32">

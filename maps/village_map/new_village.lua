@@ -2032,8 +2032,10 @@ return {
           opacity = 1,
           visible = true,
           properties = {
-            ["message"] = "The village is surrounded by tall, shadowed trees. Outside, it looks dark and creepy. You spot large vultures perched on top of the trees staring at you.",
-            ["prompt"] = "E: Leave the village to explore into the unknown."
+            ["destination"] = "sect_temple/temple",
+            ["prompt"] = "E: Enter Sect Temple",
+            ["spawnX"] = 696,
+            ["spawnY"] = 1170
           }
         },
         {
