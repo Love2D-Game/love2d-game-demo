@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="45" height="45" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="165">
+<map version="1.10" tiledversion="1.12.2" orientation="orthogonal" renderorder="right-down" width="45" height="45" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="165">
  <editorsettings>
   <export target="village.lua" format="lua"/>
  </editorsettings>
  <tileset firstgid="1" name="tiles" tilewidth="32" tileheight="32" tilecount="1536" columns="48">
-  <image source="final.tiff" width="1536" height="1024"/>
+  <image source="village_tiles.png" width="1536" height="1024"/>
  </tileset>
  <tileset firstgid="1537" name="props" tilewidth="32" tileheight="32" tilecount="384" columns="24">
-  <image source="village_props.tiff" width="768" height="512"/>
+  <image source="village_props.png" width="768" height="512"/>
  </tileset>
  <tileset firstgid="1921" name="Wooden Sword" tilewidth="32" tileheight="32" tilecount="1" columns="1">
   <image source="wooden_sword.png" width="32" height="32"/>
@@ -22,10 +22,14 @@
   <image source="lamp.png" width="32" height="32"/>
  </tileset>
  <tileset firstgid="1925" name="bamboo" tilewidth="32" tileheight="32" tilecount="2" columns="1">
-  <image source="bamboo/bamboo.png" width="32" height="64"/>
+  <image source="bamboo.png" width="32" height="64"/>
  </tileset>
  <tileset firstgid="1927" name="qi_pool" tilewidth="32" tileheight="32" tilecount="4" columns="2">
-  <image source="magic pool/magic_pool0.png" width="64" height="64"/>
+  <image source="magic_pool/magic_pool0.png" width="64" height="64"/>
+ </tileset>
+ <tileset firstgid="1931" name="Cave Entrance" tilewidth="112" tileheight="90" tilecount="1" columns="1">
+  <tileoffset x="4" y="8"/>
+  <image source="cave_entrance.png" width="112" height="90"/>
  </tileset>
  <layer id="1" name="Ground" width="45" height="45" locked="1">
   <data encoding="csv">
@@ -113,7 +117,7 @@
 0,0,1925,0,1926,0,0,0,0,0,0,626,627,628,629,0,0,0,0,0,0,0,0,0,0,1924,0,0,0,0,0,0,0,0,0,0,0,1240,1241,0,0,0,1333,1334,1335,
 0,0,1926,0,0,0,0,0,0,0,0,674,675,676,677,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1288,1289,0,933,934,935,0,0,
 0,1925,0,1925,0,381,382,383,0,0,0,0,0,0,0,0,621,622,623,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1923,0,0,1336,1337,0,981,982,983,1246,1247,
-0,1926,0,1926,0,429,430,431,0,0,0,0,0,0,0,0,669,670,671,0,0,1924,0,0,0,0,1921,0,621,622,623,0,0,0,0,0,0,0,1243,1244,1029,1030,1031,1294,1295,
+0,1926,0,1926,0,429,430,431,1931,0,0,0,0,0,0,0,669,670,671,0,0,1924,0,0,0,0,1921,0,621,622,623,0,0,0,0,0,0,0,1243,1244,1029,1030,1031,1294,1295,
 1925,0,1925,0,1925,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,669,670,671,0,0,0,0,0,0,0,1291,1292,0,0,0,1342,1343,
 1926,0,1926,0,1926,0,0,0,0,0,0,1923,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1339,1340,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,591,592,593,0,0,949,950,0,0,0,0,0,949,950,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -234,7 +238,7 @@
   <object id="142" x="1088" y="896" width="64" height="96"/>
   <object id="164" x="800" y="1024" width="32" height="32"/>
  </objectgroup>
- <objectgroup id="7" name="Interactables" locked="1">
+ <objectgroup id="7" name="Interactions">
   <object id="158" name="QiPool" x="32" y="32" width="128" height="96">
    <properties>
     <property name="message" value="The pool radiates immense amounts of spiritual energy, but something prevents you from using it to cultivate."/>
@@ -271,8 +275,16 @@
     <property name="prompt" value="E: Leave the village to explore into the unknown."/>
    </properties>
   </object>
+  <object id="151" name="Cave Entrance" x="300" y="1132" width="32" height="32">
+   <properties>
+    <property name="destination" value="cave/cave"/>
+    <property name="prompt" value="E: Enter cave"/>
+    <property name="range" type="int" value="80"/>
+    <property name="spawnX" type="float" value="689.11"/>
+    <property name="spawnY" type="float" value="1290.47"/>
+   </properties>
+  </object>
  </objectgroup>
  <objectgroup id="6" name="Triggers" locked="1">
-  <object id="151" x="832" y="1120" width="32" height="32"/>
  </objectgroup>
 </map>

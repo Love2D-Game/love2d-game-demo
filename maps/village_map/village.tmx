@@ -4,10 +4,10 @@
   <export target="village_updated.lua" format="lua"/>
  </editorsettings>
  <tileset firstgid="1" name="tiles" tilewidth="32" tileheight="32" tilecount="1536" columns="48">
-  <image source="final.tiff" width="1536" height="1024"/>
+  <image source="village_tiles.png" width="1536" height="1024"/>
  </tileset>
  <tileset firstgid="1537" name="props" tilewidth="32" tileheight="32" tilecount="384" columns="24">
-  <image source="village_props.tiff" width="768" height="512"/>
+  <image source="village_props.png" width="768" height="512"/>
  </tileset>
  <tileset firstgid="1921" name="Wooden Sword" tilewidth="32" tileheight="32" tilecount="1" columns="1">
   <image source="wooden_sword.png" width="32" height="32"/>
@@ -22,10 +22,10 @@
   <image source="lamp.png" width="32" height="32"/>
  </tileset>
  <tileset firstgid="1925" name="bamboo" tilewidth="32" tileheight="32" tilecount="2" columns="1">
-  <image source="bamboo/bamboo.png" width="32" height="64"/>
+  <image source="bamboo.png" width="32" height="64"/>
  </tileset>
  <tileset firstgid="1927" name="qi_pool" tilewidth="32" tileheight="32" tilecount="4" columns="2">
-  <image source="magic pool/magic_pool0.png" width="64" height="64"/>
+  <image source="magic_pool/magic_pool0.png" width="64" height="64"/>
  </tileset>
  <layer id="1" name="Ground" width="45" height="45">
   <data encoding="csv">

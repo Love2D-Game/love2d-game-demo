@@ -9,7 +9,7 @@ return {
   height = 45,
   tilewidth = 32,
   tileheight = 32,
-  nextlayerid = 8,
+  nextlayerid = 9,
   nextobjectid = 165,
   properties = {},
   tilesets = {
@@ -244,6 +244,35 @@ return {
       wangsets = {},
       tilecount = 4,
       tiles = {}
+    },
+    {
+      name = "Cave Entrance",
+      firstgid = 1931,
+      class = "",
+      tilewidth = 112,
+      tileheight = 90,
+      spacing = 0,
+      margin = 0,
+      columns = 1,
+      image = "cave_entrance.png",
+      imagewidth = 112,
+      imageheight = 90,
+      objectalignment = "unspecified",
+      tilerendersize = "tile",
+      fillmode = "stretch",
+      tileoffset = {
+        x = 4,
+        y = 8
+      },
+      grid = {
+        orientation = "orthogonal",
+        width = 112,
+        height = 90
+      },
+      properties = {},
+      wangsets = {},
+      tilecount = 1,
+      tiles = {}
     }
   },
   layers = {
@@ -365,7 +394,7 @@ return {
         0, 0, 1925, 0, 1926, 0, 0, 0, 0, 0, 0, 626, 627, 628, 629, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1924, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1240, 1241, 0, 0, 0, 1333, 1334, 1335,
         0, 0, 1926, 0, 0, 0, 0, 0, 0, 0, 0, 674, 675, 676, 677, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1288, 1289, 0, 933, 934, 935, 0, 0,
         0, 1925, 0, 1925, 0, 381, 382, 383, 0, 0, 0, 0, 0, 0, 0, 0, 621, 622, 623, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1923, 0, 0, 1336, 1337, 0, 981, 982, 983, 1246, 1247,
-        0, 1926, 0, 1926, 0, 429, 430, 431, 0, 0, 0, 0, 0, 0, 0, 0, 669, 670, 671, 0, 0, 1924, 0, 0, 0, 0, 1921, 0, 621, 622, 623, 0, 0, 0, 0, 0, 0, 0, 1243, 1244, 1029, 1030, 1031, 1294, 1295,
+        0, 1926, 0, 1926, 0, 429, 430, 431, 1931, 0, 0, 0, 0, 0, 0, 0, 669, 670, 671, 0, 0, 1924, 0, 0, 0, 0, 1921, 0, 621, 622, 623, 0, 0, 0, 0, 0, 0, 0, 1243, 1244, 1029, 1030, 1031, 1294, 1295,
         1925, 0, 1925, 0, 1925, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 669, 670, 671, 0, 0, 0, 0, 0, 0, 0, 1291, 1292, 0, 0, 0, 1342, 1343,
         1926, 0, 1926, 0, 1926, 0, 0, 0, 0, 0, 0, 1923, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1339, 1340, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 591, 592, 593, 0, 0, 949, 950, 0, 0, 0, 0, 0, 949, 950, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -1895,7 +1924,7 @@ return {
       type = "objectgroup",
       draworder = "topdown",
       id = 7,
-      name = "Interactables",
+      name = "Interactions",
       class = "",
       visible = true,
       opacity = 1,
@@ -2006,6 +2035,26 @@ return {
             ["message"] = "The village is surrounded by tall, shadowed trees. Outside, it looks dark and creepy. You spot large vultures perched on top of the trees staring at you.",
             ["prompt"] = "E: Leave the village to explore into the unknown."
           }
+        },
+        {
+          id = 151,
+          name = "Cave Entrance",
+          type = "",
+          shape = "rectangle",
+          x = 300,
+          y = 1132,
+          width = 32,
+          height = 32,
+          rotation = 0,
+          opacity = 1,
+          visible = true,
+          properties = {
+            ["destination"] = "cave/cave",
+            ["prompt"] = "E: Enter cave",
+            ["range"] = 80,
+            ["spawnX"] = 689.11,
+            ["spawnY"] = 1290.47
+          }
         }
       }
     },
@@ -2022,22 +2071,7 @@ return {
       parallaxx = 1,
       parallaxy = 1,
       properties = {},
-      objects = {
-        {
-          id = 151,
-          name = "",
-          type = "",
-          shape = "rectangle",
-          x = 832,
-          y = 1120,
-          width = 32,
-          height = 32,
-          rotation = 0,
-          opacity = 1,
-          visible = true,
-          properties = {}
-        }
-      }
+      objects = {}
     }
   }
 }
